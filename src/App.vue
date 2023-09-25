@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
 </script>
 
 <template>
@@ -15,9 +14,11 @@ import HelloWorld from './components/HelloWorld.vue'
   </header> -->
     <div class="body">
       <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
+        <!-- <RouterLink to="/">Home</RouterLink>
+        <RouterLink to="/about">About</RouterLink> -->
         <RouterLink to="/level1">Level 1</RouterLink>
+        <RouterLink to="/level2">Level 2</RouterLink>
+
 
       </nav>
       <RouterView />
@@ -30,6 +31,7 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  background-color: #181818;
 }
 header {
   line-height: 1.5;

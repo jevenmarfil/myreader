@@ -2,7 +2,8 @@
   <div style="display: flex">
     <div class="title">
       <h1>Drag the Letter Game</h1>
-      <h3>Level 1</h3>
+      <h3>Level 2</h3>
+
       <div class="letter-container">
         <div
           v-for="(letter, index) in unshuffledLetters"
@@ -101,7 +102,7 @@ const dropLetter = (letter: any, rowIndex: number, colIndex: number) => {
 
 const generateGrid = () => {
   // Shuffle the letters array randomly
-  // shuffleArray(letters.value)
+  shuffleArray(letters.value)
 
   // Initialize the 6x6 grid
   for (let i = 0; i < 6; i++) {
