@@ -81,9 +81,9 @@ const startDrag = (letter: any) => {
   selectedLetter.value.text = letter
 }
 
-const endDrag = () => {
-  selectedLetter.value = null
-}
+// const endDrag = () => {
+//   selectedLetter.value = null
+// }
 
 const dropLetter = (letter: any, rowIndex: number, colIndex: number) => {
   if (selectedLetter.value.text !== null && selectedLetter.value.text === letter) {
