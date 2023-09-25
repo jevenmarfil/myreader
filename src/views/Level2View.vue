@@ -11,6 +11,7 @@
           class="letter"
           :style="{ backgroundColor: letter.color, color: 'white' }"
           @mousedown="startDrag(letter.text)"
+          @touchstart="startDrag(letter.text)"
           draggable="true"
         >
           {{ letter.text }}
