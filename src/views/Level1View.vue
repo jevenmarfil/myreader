@@ -1,20 +1,18 @@
 <template>
-  <div style="display: flex; flex-direction: column; align-items: center;">
-    <div class="title">
-      <h1>Drag the Letter Game Level 1</h1>
-      <div class="letter-container">
-        <div
-          v-for="(letter, index) in unshuffledLetters"
-          :key="index"
-          class="letter"
-          :style="{ backgroundColor: letter.color, color: 'white' }"
-          @mousedown="startDrag($event, letter.text)"
-          @touchstart.prevent="startDrag($event, letter.text)"
-          @dragover.prevent
-          draggable="true"
-        >
-          {{ letter.text }}
-        </div>
+  <div class = "scrollable-container"  id="scrollable-container" ref="scrollContainer">
+    <h2>Drag the Letter Game - Level 1</h2>
+    <div class="letter-container">
+      <div
+        v-for="(letter, index) in unshuffledLetters"
+        :key="index"
+        class="letter"
+        :style="{ backgroundColor: letter.color, color: 'white' }"
+        @mousedown="startDrag($event, letter.text)"
+        @touchstart.prevent="startDrag($event, letter.text)"
+        @dragover.prevent
+        draggable="true"
+      >
+        {{ letter.text }}
       </div>
     </div>
     <div class="grid">
@@ -55,9 +53,14 @@ const grid = ref<any>([])
 const colors = ['green', 'purple'] // Define the two alternating colors
 let colorIndex = 0 // Initialize the color index
 const dropZone = ref([]);
+const scrollContainer = ref(null);
 
 //methods
 onMounted(() => {
+
+  const container: any = scrollContainer.value;
+  container.addEventListener('touchmove', handleTouchMove);
+  
   for (let letterCode = 65; letterCode <= 90; letterCode++) {
     const color = colors[colorIndex] // Get the current color
     letters.value.push({
@@ -87,6 +90,23 @@ onMounted(() => {
 
   generateGrid()
 })
+const handleTouchMove = (event: any) => {
+  
+      console.log("TOUCHING", event.type)
+      const touch = event.touches[0];
+      const currentX = touch.clientX;
+      const currentY = touch.clientY;
+      console.log("TOUCHING", event.type, currentX , currentY )
+
+
+      if(currentY >= window.innerHeight-60){
+        window.scrollBy(0,5);
+      }else if(currentY <= 60){
+        window.scrollBy(0,-5);
+      }
+
+
+    };
 
 const startDrag = (event: Event, letter: any) => {
   const targetElement: any = dropZone.value.find((el: any)=>el.innerText == letter);
@@ -99,11 +119,14 @@ const startDrag = (event: Event, letter: any) => {
       const touch = event.touches[0];
       const currentX = touch.clientX;
       const currentY = touch.clientY;
-      const elementAtTouchPoint = document.elementFromPoint(currentX, currentY);
+      const elementAtTouchPoint: any = document.elementFromPoint(currentX, currentY);
       if (elementAtTouchPoint !== null && elementAtTouchPoint.id == "cell"+letter) {
         // Another element is touched during touchmove
         touchedElementId = elementAtTouchPoint.id
         console.log("Touched another element:", elementAtTouchPoint, elementAtTouchPoint.id);
+      }
+      else if(elementAtTouchPoint.id && elementAtTouchPoint.id != "cell"+letter){
+        touchedElementId = null;
       }
     })
 
@@ -182,11 +205,18 @@ const shuffleArray = (array: any) => {
 </script>
 
 <style scoped>
-.title {
-  text-align: center;
-  width: 100%;
+/* Style the scrollable container */
+.scrollable-container {
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  overflow-y: scroll;
+  /* overflow: hidden; */
+  border: 1px solid #ccc; /* Add borders or styling as desired */
 }
 .letter-container {
+  text-align: center;
+  width: 100%;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -244,5 +274,16 @@ const shuffleArray = (array: any) => {
   height: 390px;
   pointer-events: none;
   background: radial-gradient(circle, transparent, transparent 18px, #007fff 20px, #007fff 23px, #1f90ff 23px, #1f90ff 36px, #007fff) center top/60px 60px;
+}
+
+@media (max-width: 500px) {
+  .row {
+  width: 95vw;
+  height: 10vh;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  font-size: 30px; /* Adjust font size as needed */
+}
 }
 </style>
