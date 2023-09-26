@@ -1,16 +1,16 @@
 <template>
-  <div style="display: flex">
+  <div style="display: flex; flex-direction: column; align-items: center;">
     <div class="title">
-      <h1>Drag the Letter Game</h1>
-      <h3>Level 1</h3>
+      <h1>Drag the Letter Game Level 1</h1>
       <div class="letter-container">
         <div
           v-for="(letter, index) in unshuffledLetters"
           :key="index"
           class="letter"
           :style="{ backgroundColor: letter.color, color: 'white' }"
-          @mousedown="startDrag(letter.text)"
-          @touchstart="startDrag(letter.text)"
+          @mousedown="startDrag($event, letter.text)"
+          @touchstart.prevent="startDrag($event, letter.text)"
+          @dragover.prevent
           draggable="true"
         >
           {{ letter.text }}
@@ -22,9 +22,14 @@
         <div
           v-for="(cell, colIndex) in row"
           :key="colIndex"
+          :id="'cell'+cell.letter"
           class="cell"
+          ref="dropZone"
           @dragover.prevent
           @drop="dropLetter(cell.letter, rowIndex, colIndex)"
+          @touchend="dropLetter(cell.letter, rowIndex, colIndex)"
+          @touchstart.prevent="console.log('touched', cell.letter)"
+          @touchmove.prevent="console.log('passed here', $event.touches)"
         >
           <div class="drop-zone">
             <div class="letter" :style="{ backgroundColor: cell.color }" v-if="cell.isPlaced == 1">
@@ -49,6 +54,7 @@ const droppedLetter = ref({ text: null, color: '' })
 const grid = ref<any>([])
 const colors = ['green', 'purple'] // Define the two alternating colors
 let colorIndex = 0 // Initialize the color index
+const dropZone = ref([]);
 
 //methods
 onMounted(() => {
@@ -82,15 +88,64 @@ onMounted(() => {
   generateGrid()
 })
 
-const startDrag = (letter: any) => {
+const startDrag = (event: Event, letter: any) => {
+  const targetElement: any = dropZone.value.find((el: any)=>el.innerText == letter);
+  console.log("startDrag", event, letter, targetElement)
+
+  let touchedElementId: any;
+  if(event.target){
+    event.target.addEventListener("touchmove", (event: any) => {
+      console.log('touchmove')
+      const touch = event.touches[0];
+      const currentX = touch.clientX;
+      const currentY = touch.clientY;
+      const elementAtTouchPoint = document.elementFromPoint(currentX, currentY);
+      if (elementAtTouchPoint !== null && elementAtTouchPoint.id == "cell"+letter) {
+        // Another element is touched during touchmove
+        touchedElementId = elementAtTouchPoint.id
+        console.log("Touched another element:", elementAtTouchPoint, elementAtTouchPoint.id);
+      }
+    })
+
+    event.target.addEventListener("touchend", (event: any)=>{
+      if(touchedElementId){
+        endDrag(event, letter)
+        console.log("Touched element ID at touchend:", touchedElementId);
+        touchedElementId = null;
+
+      }
+    })
+  }
+
+  if(event.type == "touchstart"){
+    const touchStartEvent = new TouchEvent("touchstart", {
+        bubbles: true,
+        cancelable: true,
+        view: window,
+      });
+      
+      targetElement.dispatchEvent(touchStartEvent);
+  }
   selectedLetter.value.text = letter
 }
 
-// const endDrag = () => {
-//   selectedLetter.value = null
-// }
+const endDrag = (event: Event, letter: string) => {
+  const targetElement: any = dropZone.value.find((el: any)=>el.innerText == letter);
+  console.log("endDrag")
+  if(event.type == "touchend"){
+    const touchEndEvent = new TouchEvent("touchend", {
+        bubbles: true,
+        cancelable: true,
+        view: window,
+      });
+      
+      targetElement.dispatchEvent(touchEndEvent);
+  }
+  selectedLetter.value = { text: null, color: ''}
+}
 
 const dropLetter = (letter: any, rowIndex: number, colIndex: number) => {
+  console.log("DROPPED")
   if (selectedLetter.value.text !== null && selectedLetter.value.text === letter) {
     console.log('DROP LOCATION', letter)
     grid.value[rowIndex][colIndex].isPlaced = 1
@@ -129,6 +184,7 @@ const shuffleArray = (array: any) => {
 <style scoped>
 .title {
   text-align: center;
+  width: 100%;
 }
 .letter-container {
   display: flex;
@@ -136,12 +192,12 @@ const shuffleArray = (array: any) => {
   justify-content: center;
 }
 .letter {
-  width: 70px;
-  height: 70px;
+  width: 50px;
+  height: 50px;
   background-color: #3498db;
   color: #fff;
   text-align: center;
-  line-height: 70px;
+  line-height: 50px;
   margin: 5px;
   cursor: pointer;
   border-radius: 50%; /* Add this line */
@@ -155,17 +211,17 @@ const shuffleArray = (array: any) => {
 }
 
 .row {
-  width: 600px;
-  height: 100px;
+  width: 500px;
+  height: 70px;
   display: flex;
-  justify-content: center;
+  justify-content: space-evenly;
   align-items: center;
   font-size: 30px; /* Adjust font size as needed */
 }
 
 .cell {
-  width: 80px; /* Adjust the cell width as needed */
-  height: 80px; /* Adjust the cell height as needed */
+  width: 55px; /* Adjust the cell width as needed */
+  height: 55px; /* Adjust the cell height as needed */
   border: 1px solid #ccc; /* Add borders to cells if desired */
   display: flex;
   margin-left: 1.5%;
