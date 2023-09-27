@@ -49,7 +49,7 @@
             </div>
             <div v-else>{{ cell.letter }}</div>
           </div>
-          <audio ref="audio" preload="auto">
+          <audio :id="'audio'+cell.letter" preload="auto">
             <source :src="'./'+cell.letter+'.mp3'" type="audio/mp3">
           </audio>
 
@@ -206,7 +206,7 @@ const dropLetter = (letter: any, rowIndex: number, colIndex: number) => {
   console.log('DROPPED')
   if (selectedLetter.value.text !== null && selectedLetter.value.text === letter) {
     console.log('DROP LOCATION', letter)
-    playSound()
+    playSound(letter)
     grid.value[rowIndex][colIndex].isPlaced = 1
     // letters.value.splice(index, 0, selectedLetter.value);
     droppedLetter.value = selectedLetter.value
@@ -214,8 +214,8 @@ const dropLetter = (letter: any, rowIndex: number, colIndex: number) => {
   }
 }
 
-const playSound = () => {
-      const audioElement: any = document.querySelector('audio');
+const playSound = (letter: string) => {
+      const audioElement: any = document.querySelector(`audio#audio${letter}`);
       audioElement.play();
     }
 const generateGrid = () => {
