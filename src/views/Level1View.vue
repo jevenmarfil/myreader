@@ -148,6 +148,7 @@ const startDrag = (event: any, letter: any) => {
     audioElement.value.pause();
   }
   audioElement.value = null
+
   let touchedElementId: any
   if (event.target) {
     event.target.addEventListener('touchmove', (e: any) => {
