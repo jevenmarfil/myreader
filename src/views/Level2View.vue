@@ -16,7 +16,7 @@
     >
       {{ selectedLetter.text }}
     </div>
-    <h2>Drag the Letter Game - Level 1</h2>
+    <h2>Drag the Letter Game - Level 2</h2>
     <div class="letter-container">
       <div
         v-for="(letter, index) in unshuffledLetters"
@@ -74,7 +74,7 @@ const dropZone = ref([])
 const scrollContainer = ref(null)
 const selectedLetterdivX = ref(0)
 const selectedLetterdivY = ref(0)
-
+const audioElement = ref<any>()
 //methods
 onMounted(() => {
   const container: any = scrollContainer.value
@@ -144,7 +144,9 @@ const handleTouchMove = (event: any) => {
 const startDrag = (event: any, letter: any) => {
   const targetElement: any = dropZone.value.find((el: any) => el.innerText == letter.text)
   console.log('startDrag', event, letter.text, letter.color)
-
+  if(audioElement.value){
+    audioElement.value.pause();
+  }
   let touchedElementId: any
   if (event.target) {
     event.target.addEventListener('touchmove', (e: any) => {
@@ -202,21 +204,23 @@ const endDrag = (event: Event, letter: string) => {
   selectedLetter.value = { text: null, color: '' }
 }
 
-const dropLetter = (letter: any, rowIndex: number, colIndex: number) => {
+const dropLetter = async (letter: any, rowIndex: number, colIndex: number) => {
   console.log('DROPPED')
   if (selectedLetter.value.text !== null && selectedLetter.value.text === letter) {
     console.log('DROP LOCATION', letter)
-    playSound(letter)
     grid.value[rowIndex][colIndex].isPlaced = 1
     // letters.value.splice(index, 0, selectedLetter.value);
     droppedLetter.value = selectedLetter.value
     selectedLetter.value.text = null
+    await playSound(letter)
+
   }
 }
 
-const playSound = (letter: string) => {
-      const audioElement: any = document.querySelector(`audio#audio${letter}`);
-      audioElement.play();
+const playSound = async (letter: string) => {
+      audioElement.value = document.querySelector(`audio#audio${letter}`);
+      console.log('audioElement.value', audioElement.value.volume)
+      await audioElement.value.play();
     }
 const generateGrid = () => {
   // Shuffle the letters array randomly
