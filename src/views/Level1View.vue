@@ -208,17 +208,18 @@ const dropLetter = async (letter: any, rowIndex: number, colIndex: number) => {
   console.log('DROPPED')
   if (selectedLetter.value.text !== null && selectedLetter.value.text === letter) {
     console.log('DROP LOCATION', letter)
-    await playSound(letter)
     grid.value[rowIndex][colIndex].isPlaced = 1
     // letters.value.splice(index, 0, selectedLetter.value);
     droppedLetter.value = selectedLetter.value
     selectedLetter.value.text = null
+    await playSound(letter)
+
   }
 }
 
 const playSound = async (letter: string) => {
       audioElement.value = document.querySelector(`audio#audio${letter}`);
-      console.log('audioElement.value', audioElement.value)
+      console.log('audioElement.value', audioElement.value.volume)
       await audioElement.value.play();
     }
 const generateGrid = () => {
