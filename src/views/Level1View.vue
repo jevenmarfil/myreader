@@ -49,6 +49,10 @@
             </div>
             <div v-else>{{ cell.letter }}</div>
           </div>
+          <audio ref="audio" preload="auto">
+            <source :src="'./'+cell.letter+'.mp3'" type="audio/mp3">
+          </audio>
+
         </div>
       </div>
       <!-- <div class="front"></div> -->
@@ -58,6 +62,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+
 const unshuffledLetters = ref<any>([])
 const letters = ref<any>([])
 const selectedLetter = ref({ text: null, color: '' })
@@ -69,7 +74,6 @@ const dropZone = ref([])
 const scrollContainer = ref(null)
 const selectedLetterdivX = ref(0)
 const selectedLetterdivY = ref(0)
-
 
 //methods
 onMounted(() => {
@@ -202,6 +206,7 @@ const dropLetter = (letter: any, rowIndex: number, colIndex: number) => {
   console.log('DROPPED')
   if (selectedLetter.value.text !== null && selectedLetter.value.text === letter) {
     console.log('DROP LOCATION', letter)
+    playSound()
     grid.value[rowIndex][colIndex].isPlaced = 1
     // letters.value.splice(index, 0, selectedLetter.value);
     droppedLetter.value = selectedLetter.value
@@ -209,6 +214,10 @@ const dropLetter = (letter: any, rowIndex: number, colIndex: number) => {
   }
 }
 
+const playSound = () => {
+      const audioElement: any = document.querySelector('audio');
+      audioElement.play();
+    }
 const generateGrid = () => {
   // Shuffle the letters array randomly
   // shuffleArray(letters.value)
