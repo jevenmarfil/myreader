@@ -204,11 +204,11 @@ const endDrag = (event: Event, letter: string) => {
   selectedLetter.value = { text: null, color: '' }
 }
 
-const dropLetter = (letter: any, rowIndex: number, colIndex: number) => {
+const dropLetter = async (letter: any, rowIndex: number, colIndex: number) => {
   console.log('DROPPED')
   if (selectedLetter.value.text !== null && selectedLetter.value.text === letter) {
     console.log('DROP LOCATION', letter)
-    playSound(letter)
+    await playSound(letter)
     grid.value[rowIndex][colIndex].isPlaced = 1
     // letters.value.splice(index, 0, selectedLetter.value);
     droppedLetter.value = selectedLetter.value
@@ -216,9 +216,10 @@ const dropLetter = (letter: any, rowIndex: number, colIndex: number) => {
   }
 }
 
-const playSound = (letter: string) => {
+const playSound = async (letter: string) => {
       audioElement.value = document.querySelector(`audio#audio${letter}`);
-      audioElement.value.play();
+      console.log('audioElement.value', audioElement.value)
+      await audioElement.value.play();
     }
 const generateGrid = () => {
   // Shuffle the letters array randomly
