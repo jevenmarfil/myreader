@@ -1,6 +1,6 @@
 <template>
   <div
-    @touchstart.prevent="handleTouchStart"
+    @touchstart="handleTouchStart"
     class="scrollable-container"
     id="scrollable-container"
     ref="scrollContainer"
@@ -130,9 +130,9 @@ const handleTouchMove = (event: any) => {
   selectedLetterdivX.value = currentX + window.scrollX - 30
   selectedLetterdivY.value = currentY + window.scrollY - 30
 
-  if (currentY >= window.innerHeight - 60) {
+  if (currentY >= window.innerHeight - 30) {
     window.scrollBy(0, 5)
-  } else if (currentY <= 60) {
+  } else if (currentY <= 30) {
     window.scrollBy(0, -5)
   }
 }
