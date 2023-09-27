@@ -27,12 +27,6 @@ import { RouterLink, RouterView } from 'vue-router'
 </template>
 
 <style scoped>
-body {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  background-color: #181818;
-}
 header {
   line-height: 1.5;
   max-height: 100vh;
