@@ -74,7 +74,7 @@ const dropZone = ref([])
 const scrollContainer = ref(null)
 const selectedLetterdivX = ref(0)
 const selectedLetterdivY = ref(0)
-
+const audioElement = ref<any>()
 //methods
 onMounted(() => {
   const container: any = scrollContainer.value
@@ -144,7 +144,9 @@ const handleTouchMove = (event: any) => {
 const startDrag = (event: any, letter: any) => {
   const targetElement: any = dropZone.value.find((el: any) => el.innerText == letter.text)
   console.log('startDrag', event, letter.text, letter.color)
-
+  if(audioElement.value){
+    audioElement.value.pause();
+  }
   let touchedElementId: any
   if (event.target) {
     event.target.addEventListener('touchmove', (e: any) => {
@@ -215,8 +217,8 @@ const dropLetter = (letter: any, rowIndex: number, colIndex: number) => {
 }
 
 const playSound = (letter: string) => {
-      const audioElement: any = document.querySelector(`audio#audio${letter}`);
-      audioElement.play();
+      audioElement.value = document.querySelector(`audio#audio${letter}`);
+      audioElement.value.play();
     }
 const generateGrid = () => {
   // Shuffle the letters array randomly
