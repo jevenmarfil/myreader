@@ -1,14 +1,30 @@
 <template>
-  <div class = "scrollable-container"  id="scrollable-container" ref="scrollContainer">
+  <div
+    @touchstart.prevent="handleTouchStart"
+    class="scrollable-container"
+    id="scrollable-container"
+    ref="scrollContainer"
+  >
+    <div
+      class="letter-drag"
+      :style="{
+        left: selectedLetterdivX + 'px',
+        top: selectedLetterdivY + 'px',
+        display: selectedLetter.text ? '' : 'none',
+        backgroundColor: selectedLetter.color,
+      }"
+    >
+      {{ selectedLetter.text }}
+    </div>
     <h2>Drag the Letter Game - Level 1</h2>
     <div class="letter-container">
       <div
         v-for="(letter, index) in unshuffledLetters"
         :key="index"
         class="letter"
-        :style="{ backgroundColor: letter.color, color: 'white' }"
-        @mousedown="startDrag($event, letter.text)"
-        @touchstart.prevent="startDrag($event, letter.text)"
+        :style="{ backgroundColor: letter.color }"
+        @mousedown="startDrag($event, letter)"
+        @touchstart.prevent="startDrag($event, letter)"
         @dragover.prevent
         draggable="true"
       >
@@ -26,8 +42,6 @@
           @dragover.prevent
           @drop="dropLetter(cell.letter, rowIndex, colIndex)"
           @touchend="dropLetter(cell.letter, rowIndex, colIndex)"
-          @touchstart.prevent="console.log('touched', cell.letter)"
-          @touchmove.prevent="console.log('passed here', $event.touches)"
         >
           <div class="drop-zone">
             <div class="letter" :style="{ backgroundColor: cell.color }" v-if="cell.isPlaced == 1">
@@ -38,7 +52,6 @@
         </div>
       </div>
       <!-- <div class="front"></div> -->
-
     </div>
   </div>
 </template>
@@ -50,17 +63,19 @@ const letters = ref<any>([])
 const selectedLetter = ref({ text: null, color: '' })
 const droppedLetter = ref({ text: null, color: '' })
 const grid = ref<any>([])
-const colors = ['green', 'purple'] // Define the two alternating colors
+const colors = ['#8ab6a5', '#6b679e'] // Define the two alternating colors
 let colorIndex = 0 // Initialize the color index
-const dropZone = ref([]);
-const scrollContainer = ref(null);
+const dropZone = ref([])
+const scrollContainer = ref(null)
+const selectedLetterdivX = ref(0)
+const selectedLetterdivY = ref(0)
+
 
 //methods
 onMounted(() => {
+  const container: any = scrollContainer.value
+  container.addEventListener('touchmove', handleTouchMove)
 
-  const container: any = scrollContainer.value;
-  container.addEventListener('touchmove', handleTouchMove);
-  
   for (let letterCode = 65; letterCode <= 90; letterCode++) {
     const color = colors[colorIndex] // Get the current color
     letters.value.push({
@@ -90,85 +105,101 @@ onMounted(() => {
 
   generateGrid()
 })
-const handleTouchMove = (event: any) => {
+
+const handleTouchStart = (event: any) => {
+if(event.touches[0]){
+  const touch = event.touches[0]
+  console.log("TOUCH START", event)
+  const currentX = touch.clientX
+  const currentY = touch.clientY
+    // Update the selectedLetterdivX and selectedLetterdivY
+  selectedLetterdivX.value = currentX + window.scrollX - 30
+  selectedLetterdivY.value = currentY + window.scrollY - 30
   
-      console.log("TOUCHING", event.type)
-      const touch = event.touches[0];
-      const currentX = touch.clientX;
-      const currentY = touch.clientY;
-      console.log("TOUCHING", event.type, currentX , currentY )
+}
 
+}
+const handleTouchMove = (event: any) => {
+  console.log('TOUCHING', event.type)
+  const touch = event.touches[0]
+  const currentX = touch.clientX
+  const currentY = touch.clientY
+  console.log('TOUCHING', event.type, currentX, currentY)
 
-      if(currentY >= window.innerHeight-60){
-        window.scrollBy(0,5);
-      }else if(currentY <= 60){
-        window.scrollBy(0,-5);
-      }
+  // Update the selectedLetterdivX and selectedLetterdivY
+  selectedLetterdivX.value = currentX + window.scrollX - 30
+  selectedLetterdivY.value = currentY + window.scrollY - 30
 
+  if (currentY >= window.innerHeight - 60) {
+    window.scrollBy(0, 5)
+  } else if (currentY <= 60) {
+    window.scrollBy(0, -5)
+  }
+}
 
-    };
+const startDrag = (event: any, letter: any) => {
+  const targetElement: any = dropZone.value.find((el: any) => el.innerText == letter.text)
+  console.log('startDrag', event, letter.text, letter.color)
 
-const startDrag = (event: Event, letter: any) => {
-  const targetElement: any = dropZone.value.find((el: any)=>el.innerText == letter);
-  console.log("startDrag", event, letter, targetElement)
-
-  let touchedElementId: any;
-  if(event.target){
-    event.target.addEventListener("touchmove", (event: any) => {
+  let touchedElementId: any
+  if (event.target) {
+    event.target.addEventListener('touchmove', (e: any) => {
       console.log('touchmove')
-      const touch = event.touches[0];
-      const currentX = touch.clientX;
-      const currentY = touch.clientY;
-      const elementAtTouchPoint: any = document.elementFromPoint(currentX, currentY);
-      if (elementAtTouchPoint !== null && elementAtTouchPoint.id == "cell"+letter) {
+      const touch = e.touches[0]
+      const currentX = touch.clientX
+      const currentY = touch.clientY
+      const elementAtTouchPoint: any = document.elementFromPoint(currentX, currentY)
+      console.log("elementAtTouchPoint", elementAtTouchPoint)
+      if (elementAtTouchPoint !== null && elementAtTouchPoint.id == 'cell' + letter.text) {
         // Another element is touched during touchmove
         touchedElementId = elementAtTouchPoint.id
-        console.log("Touched another element:", elementAtTouchPoint, elementAtTouchPoint.id);
-      }
-      else if(elementAtTouchPoint.id && elementAtTouchPoint.id != "cell"+letter){
-        touchedElementId = null;
+        console.log('Touched another element:', elementAtTouchPoint, elementAtTouchPoint.id)
+      } else if (elementAtTouchPoint.id && elementAtTouchPoint.id != 'cell' + letter.text) {
+        touchedElementId = null
       }
     })
 
-    event.target.addEventListener("touchend", (event: any)=>{
-      if(touchedElementId){
-        endDrag(event, letter)
-        console.log("Touched element ID at touchend:", touchedElementId);
-        touchedElementId = null;
-
+    event.target.addEventListener('touchend', (event: any) => {
+      if (touchedElementId) {
+        endDrag(event, letter.text)
+        console.log('Touched element ID at touchend:', touchedElementId)
+        touchedElementId = null
       }
+      selectedLetter.value = { text: null, color: '' }
     })
   }
 
-  if(event.type == "touchstart"){
-    const touchStartEvent = new TouchEvent("touchstart", {
-        bubbles: true,
-        cancelable: true,
-        view: window,
-      });
-      
-      targetElement.dispatchEvent(touchStartEvent);
+  if (event.type == 'touchstart') {
+    const touchStartEvent = new TouchEvent('touchstart', {
+      bubbles: true,
+      cancelable: true,
+      view: window
+    })
+
+    targetElement.dispatchEvent(touchStartEvent)
   }
-  selectedLetter.value.text = letter
+  selectedLetter.value.text = letter.text
+  selectedLetter.value.color = letter.color
+
 }
 
 const endDrag = (event: Event, letter: string) => {
-  const targetElement: any = dropZone.value.find((el: any)=>el.innerText == letter);
-  console.log("endDrag")
-  if(event.type == "touchend"){
-    const touchEndEvent = new TouchEvent("touchend", {
-        bubbles: true,
-        cancelable: true,
-        view: window,
-      });
-      
-      targetElement.dispatchEvent(touchEndEvent);
+  const targetElement: any = dropZone.value.find((el: any) => el.innerText == letter)
+  console.log('endDrag')
+  if (event.type == 'touchend') {
+    const touchEndEvent = new TouchEvent('touchend', {
+      bubbles: true,
+      cancelable: true,
+      view: window
+    })
+
+    targetElement.dispatchEvent(touchEndEvent)
   }
-  selectedLetter.value = { text: null, color: ''}
+  selectedLetter.value = { text: null, color: '' }
 }
 
 const dropLetter = (letter: any, rowIndex: number, colIndex: number) => {
-  console.log("DROPPED")
+  console.log('DROPPED')
   if (selectedLetter.value.text !== null && selectedLetter.value.text === letter) {
     console.log('DROP LOCATION', letter)
     grid.value[rowIndex][colIndex].isPlaced = 1
@@ -207,9 +238,9 @@ const shuffleArray = (array: any) => {
 <style scoped>
 /* Style the scrollable container */
 .scrollable-container {
-  display: flex; 
-  flex-direction: column; 
-  align-items: center; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   overflow-y: scroll;
   /* overflow: hidden; */
   border: 1px solid #ccc; /* Add borders or styling as desired */
@@ -224,6 +255,21 @@ const shuffleArray = (array: any) => {
 .letter {
   width: 50px;
   height: 50px;
+  background-color: #91bbde;
+  color: white;
+  text-align: center;
+  line-height: 50px;
+  margin: 5px;
+  cursor: pointer;
+  border-radius: 50%; /* Add this line */
+  font-size: 30px;
+  border-color: black;
+}
+
+.letter-drag {
+  position: absolute;
+  width: 50px;
+  height: 50px;
   background-color: #3498db;
   color: #fff;
   text-align: center;
@@ -232,12 +278,13 @@ const shuffleArray = (array: any) => {
   cursor: pointer;
   border-radius: 50%; /* Add this line */
   font-size: 30px;
+  pointer-events: none;
 }
 .grid {
   display: grid;
   grid-template-rows: repeat(6, 0fr);
   grid-gap: 0px; /* Adjust the gap between cells as needed */
-  background-color: blue;
+  background-color: #91bbde;
 }
 
 .row {
@@ -260,7 +307,7 @@ const shuffleArray = (array: any) => {
   align-items: center;
   border-radius: 50%; /* Add this line */
   background-color: #181818;
-
+  color: white;
 }
 
 .front {
@@ -273,17 +320,27 @@ const shuffleArray = (array: any) => {
   width: 450px;
   height: 390px;
   pointer-events: none;
-  background: radial-gradient(circle, transparent, transparent 18px, #007fff 20px, #007fff 23px, #1f90ff 23px, #1f90ff 36px, #007fff) center top/60px 60px;
+  background: radial-gradient(
+      circle,
+      transparent,
+      transparent 18px,
+      #007fff 20px,
+      #007fff 23px,
+      #1f90ff 23px,
+      #1f90ff 36px,
+      #007fff
+    )
+    center top/60px 60px;
 }
 
 @media (max-width: 500px) {
   .row {
-  width: 95vw;
-  height: 10vh;
-  display: flex;
-  justify-content: space-evenly;
-  align-items: center;
-  font-size: 30px; /* Adjust font size as needed */
-}
+    width: 95vw;
+    height: 10vh;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    font-size: 30px; /* Adjust font size as needed */
+  }
 }
 </style>
