@@ -211,7 +211,7 @@ const dropLetter = (letter: any, rowIndex: number, colIndex: number) => {
 
 const generateGrid = () => {
   // Shuffle the letters array randomly
-  // shuffleArray(letters.value)
+  shuffleArray(letters.value)
 
   // Initialize the 6x6 grid
   for (let i = 0; i < 6; i++) {
