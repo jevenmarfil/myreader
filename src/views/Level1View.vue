@@ -16,7 +16,7 @@
       >
         {{ selectedLetter.text }}
       </div>
-      <h2>Drag the Letter Game - Level 1</h2>
+      <h2>Drag Me Game - Level 1</h2>
       <div class="letter-container">
         <div
           v-for="(letter, index) in unshuffledLetters"
@@ -74,8 +74,7 @@
   const scrollContainer = ref(null)
   const selectedLetterdivX = ref(0)
   const selectedLetterdivY = ref(0)
-  const audioElement = ref<any>()
-  const audoSRC = ref()
+  const audioElement = ref<any>(null)
   //methods
   onMounted(() => {
     const container: any = scrollContainer.value
@@ -220,9 +219,14 @@
   }
   
   const playSound = async (letter: string) => {
-        audioElement.value = document.querySelector(`audio#audio${letter}`);
-        console.log('audioElement.value', audioElement.value.volume)
-        await audioElement.value.play();
+        const audioElement: any = document.querySelector(`audio#audio${letter}`);
+        console.log('audioElement.value', audioElement)
+        try {
+          console.log("playing audio")
+          audioElement.play();
+        } catch (error) {
+          console.log("error", error)
+        }
       }
   const generateGrid = () => {
     // Shuffle the letters array randomly
