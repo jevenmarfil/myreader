@@ -16,7 +16,7 @@
       >
         {{ selectedLetter.text }}
       </div>
-      <h2>Phonics Game - Level 1</h2>
+      <h2>Phonics Game - Level 2</h2>
       <div class="letter-container">
         <div
           v-for="(letter, index) in unshuffledLetters"
@@ -59,7 +59,7 @@
   
   <script setup lang="ts">
   import { ref, onMounted } from 'vue'
-
+  
   const unshuffledLetters = ref<any>([])
   const letters = ref<any>([])
   const selectedLetter = ref({ text: null, color: '' })
@@ -72,14 +72,14 @@
   const selectedLetterdivX = ref(0)
   const selectedLetterdivY = ref(0)
   const audioElement = ref<any>(null)
-
+  
   const player = new Audio()
   
   //methods
   onMounted(() => {
     const container: any = scrollContainer.value
     container.addEventListener('touchmove', handleTouchMove)
-
+  
     for (let letterCode = 65; letterCode <= 90; letterCode++) {
       const color = colors[colorIndex] // Get the current color
       letters.value.push({
@@ -216,9 +216,9 @@
     }
   }
   
-
+  
   const playAudio = async(audioId: string) => {
-
+  
     try {
       player.src = `./assets/${audioId}.mp3`
       console.log("player", player.src)
@@ -226,14 +226,14 @@
       player.addEventListener('ended', ()=>{
         console.log("sound ended ")
       })
-
+  
     } catch (error) {
       console.error('Error playing audio:', error);
     } 
   }
   const generateGrid = () => {
     // Shuffle the letters array randomly
-    // shuffleArray(letters.value)
+    shuffleArray(letters.value)
   
     // Initialize the 6x6 grid
     for (let i = 0; i < 6; i++) {

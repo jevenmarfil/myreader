@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import Level1View from '../views/Level1View.vue'
 import Level2View from '../views/Level2View.vue'
+import Level3View from '../views/Level3View.vue'
 
 
 const router = createRouter({
@@ -29,6 +30,11 @@ const router = createRouter({
       path: '/level2',
       name: 'level2',
       component: Level2View
+    },
+    {
+      path: '/level3',
+      name: 'level3',
+      component: Level3View
     }
   ]
 })

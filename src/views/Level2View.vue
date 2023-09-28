@@ -16,7 +16,7 @@
     >
       {{ selectedLetter.text }}
     </div>
-    <h2>Drag Me Game - Level 2</h2>
+    <h2>Phonics Game - Level 2</h2>
     <div class="letter-container">
       <div
         v-for="(letter, index) in unshuffledLetters"
@@ -49,9 +49,6 @@
             </div>
             <div v-else>{{ cell.letter }}</div>
           </div>
-          <audio :id="'audio'+cell.letter" preload="auto">
-            <source :src="`./audio/${cell.letter}.mp3`"  type="audio/mp3">
-          </audio>
 
         </div>
       </div>
@@ -75,6 +72,9 @@ const scrollContainer = ref(null)
 const selectedLetterdivX = ref(0)
 const selectedLetterdivY = ref(0)
 const audioElement = ref<any>(null)
+
+const player = new Audio()
+
 //methods
 onMounted(() => {
   const container: any = scrollContainer.value
@@ -144,9 +144,7 @@ const handleTouchMove = (event: any) => {
 const startDrag = (event: any, letter: any) => {
   const targetElement: any = dropZone.value.find((el: any) => el.innerText == letter.text)
   console.log('startDrag', event, letter.text, letter.color)
-  // if(audioElement.value){
-  //   audioElement.value.pause();
-  // }
+  playAudio(letter.text)
   audioElement.value = null
   let touchedElementId: any
   if (event.target) {
@@ -213,21 +211,26 @@ const dropLetter = async (letter: any, rowIndex: number, colIndex: number) => {
     // letters.value.splice(index, 0, selectedLetter.value);
     droppedLetter.value = selectedLetter.value
     selectedLetter.value.text = null
-    await playSound(letter)
+    await playAudio(letter)
 
   }
 }
 
-const playSound = async (letter: string) => {
-      const audioElement: any = document.querySelector(`audio#audio${letter}`);
-      console.log('audioElement.value', audioElement)
-      try {
-        console.log("playing audio")
-        audioElement.play();
-      } catch (error) {
-        console.log("error", error)
-      }
-    }
+
+const playAudio = async(audioId: string) => {
+
+  try {
+    player.src = `./assets/${audioId}.mp3`
+    console.log("player", player.src)
+    player.play();
+    player.addEventListener('ended', ()=>{
+      console.log("sound ended ")
+    })
+
+  } catch (error) {
+    console.error('Error playing audio:', error);
+  } 
+}
 const generateGrid = () => {
   // Shuffle the letters array randomly
   shuffleArray(letters.value)
