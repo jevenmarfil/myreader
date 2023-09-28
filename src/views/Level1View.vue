@@ -17,6 +17,7 @@
         {{ selectedLetter.text }}
       </div>
       <h2>Phonics Game - Level 1</h2>
+      <button class="restart-btn" @click="restartGame">Restart</button>
       <div class="letter-container">
         <div
           v-for="(letter, index) in unshuffledLetters"
@@ -215,7 +216,6 @@
   
     }
   }
-  
 
   const playAudio = async(audioId: string) => {
 
@@ -255,10 +255,38 @@
       ;[array[i], array[j]] = [array[j], array[i]]
     }
   }
+
+  const restartGame = () => {
+    console.log("restart")
+    // Initialize the 6x6 grid
+    for (let i = 0; i < 6; i++) {
+      for (let j = 0; j < 6; j++) {
+        grid.value[i][j].isPlaced = 0
+      }
+    }
+  }
+
   </script>
   
   <style scoped>
   /* Style the scrollable container */
+  .restart-btn {
+  background-color: #007BFF; /* Set the background color */
+  color: #fff; /* Set the text color */
+  padding: 10px 20px; /* Adjust padding to fit your design */
+  border: none; /* Remove border */
+  border-radius: 5px; /* Add rounded corners */
+  cursor: pointer; /* Change cursor on hover */
+  font-size: 1em; /* Set the font size */
+  margin-top: 20px; /* Adjust margin as needed */
+  margin-bottom: 20px; /* Adjust margin as needed */
+  z-index: ;
+
+}
+
+.restart-btn:hover {
+  background-color: #0056b3; /* Change background color on hover */
+}
   .scrollable-container {
     display: flex;
     flex-direction: column;
