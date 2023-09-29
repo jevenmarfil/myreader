@@ -224,7 +224,7 @@ const dropLetter = async (letter: any, rowIndex: number, colIndex: number) => {
 
 const playAudio = async (audioId: string) => {
   try {
-    player.src = `./assets/${audioId}.mp3`
+    player.src = `./assets/audio/${audioId}.mp3`
     console.log('player', player.src)
     player.play()
     player.addEventListener('ended', () => {

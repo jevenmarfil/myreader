@@ -38,7 +38,7 @@
           <div
             v-for="(cell, colIndex) in row"
             :key="colIndex"
-            :id="'cell' + cell.letter"
+            :id="cell.letter + 'cell' + rowIndex + colIndex"
             class="cell"
             ref="dropZone"
             @dragover.prevent
@@ -56,7 +56,9 @@
               <div v-else>{{ cell.letter }}</div>
             </div>
           </div>
-          <div>Picture</div>
+          <div class="image-handler">
+            <img v-if="row.isCorrect" alt="Vue logo" class="image" src="@/assets/logo.svg" width="100" height="100" />
+          </div>
         </div>
         <!-- <div class="front"></div> -->
       </div>
@@ -74,7 +76,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 
 const unshuffledLetters = ref<any>([])
 const letters = ref<any>([])
@@ -91,6 +93,8 @@ const audioElement = ref<any>(null)
 
 const player = new Audio()
 const isCorrect = ref(false)
+const wordList = ref(['ant', 'bat', 'drum', 'fish', 'van'])
+
 //methods
 onMounted(() => {
   const container: any = scrollContainer.value
@@ -169,18 +173,24 @@ const startDrag = (event: any, letter: any) => {
       const currentY = touch.clientY
       const elementAtTouchPoint: any = document.elementFromPoint(currentX, currentY)
       console.log('elementAtTouchPoint', elementAtTouchPoint)
-      if (elementAtTouchPoint !== null && elementAtTouchPoint.id == 'cell' + letter.text) {
+
+      const parts = elementAtTouchPoint.id.split(/cell|\+/)
+      console.log('parts', parts)
+      const cellLetter = parts[0].trim()
+      console.log('cellLetter', cellLetter)
+
+      if (elementAtTouchPoint !== null && cellLetter == letter.text) {
         // Another element is touched during touchmove
         touchedElementId = elementAtTouchPoint.id
         console.log('Touched another element:', elementAtTouchPoint, elementAtTouchPoint.id)
-      } else if (elementAtTouchPoint.id && elementAtTouchPoint.id != 'cell' + letter.text) {
+      } else if (elementAtTouchPoint.id && cellLetter != +letter.text) {
         touchedElementId = null
       }
     })
 
     event.target.addEventListener('touchend', (event: any) => {
       if (touchedElementId) {
-        endDrag(event, letter.text)
+        endDrag(event, letter.text, touchedElementId)
         console.log('Touched element ID at touchend:', touchedElementId)
         touchedElementId = null
       }
@@ -201,8 +211,8 @@ const startDrag = (event: any, letter: any) => {
   selectedLetter.value.color = letter.color
 }
 
-const endDrag = (event: Event, letter: string) => {
-  const targetElement: any = dropZone.value.find((el: any) => el.innerText == letter)
+const endDrag = (event: Event, letter: string, touchedElementId: string) => {
+  const targetElement: any = dropZone.value.find((el: any) => el.id == touchedElementId)
   console.log('endDrag')
   if (event.type == 'touchend') {
     const touchEndEvent = new TouchEvent('touchend', {
@@ -231,7 +241,7 @@ const dropLetter = async (letter: any, rowIndex: number, colIndex: number) => {
 
 const playAudio = async (audioId: string) => {
   try {
-    player.src = `./assets/${audioId}.mp3`
+    player.src = `./assets/audio/${audioId}.mp3`
     console.log('player', player.src)
     player.play()
     player.addEventListener('ended', () => {
@@ -243,16 +253,13 @@ const playAudio = async (audioId: string) => {
 }
 const generateGrid = () => {
   // Shuffle the letters array randomly
-  // shuffleArray(letters.value)
-
-  const wordList = ['cat', 'dog', 'bat', 'rat', 'lion'];
+  shuffleArray(wordList.value)
 
   // Initialize the grid
-  for (let i = 0; i < wordList.length; i++) {
-
-    const word = wordList[i];
-    const wordLength = word.length;
-    const row = [];
+  for (let i = 0; i < wordList.value.length; i++) {
+    const word = wordList.value[i]
+    const wordLength = word.length
+    const row = []
 
     // grid.value[i].push({
     //     letter: letters.value[i * 6 + j].text,
@@ -260,26 +267,23 @@ const generateGrid = () => {
     //     isPlaced: 0
     //   })
     for (let j = 0; j < 4; j++) {
-
-        if (j < wordLength) {
-            const index = letters.value.findIndex((letter:any)=>letter.text == word[j].toUpperCase())
-            console.log("index", word[j].toUpperCase(),index)
-            row.push({
-                letter: word[j].toUpperCase(),
-                color: letters.value[index].color,
-                isPlaced: 0,
-            });
-            } else {
-            // Add an empty cell for words shorter than 4 letters
-            row.push({
-                letter: '',
-                color: 'transparent', // You can set the background to transparent
-                isPlaced: 0,
-            });
-            }
+      if (j < wordLength) {
+        const index = letters.value.findIndex((letter: any) => letter.text == word[j].toUpperCase())
+        row.push({
+          letter: word[j].toUpperCase(),
+          color: letters.value[index].color,
+          isPlaced: 0
+        })
+      } else {
+        // Add an empty cell for words shorter than 4 letters
+        row.push({
+          letter: undefined,
+          color: 'transparent', // You can set the background to transparent
+          isPlaced: 1
+        })
+      }
     }
     grid.value.push(row)
-
   }
 }
 
@@ -294,9 +298,13 @@ const shuffleArray = (array: any) => {
 const restartGame = () => {
   console.log('restart')
   // Initialize the 6x6 grid
-  for (let i = 0; i < 6; i++) {
-    for (let j = 0; j < 6; j++) {
-      grid.value[i][j].isPlaced = 0
+  for (let i = 0; i < wordList.value.length; i++) {
+    const row = grid.value[i]
+    row.isCorrect = false
+    for (let j = 0; j < 4; j++) {
+      if (grid.value[i][j].letter) {
+        grid.value[i][j].isPlaced = 0
+      }
     }
   }
 }
@@ -304,6 +312,45 @@ const restartGame = () => {
 const closeModal = () => {
   isCorrect.value = false // Close the modal
 }
+
+const checkRow = (rowIndex: any) => {
+  const row = grid.value[rowIndex]
+  const correctWord = wordList.value[rowIndex].toUpperCase()
+  const currentWord = row.map((cell: any) => cell.letter).join('')
+
+  if (currentWord === correctWord) {
+    // The row forms the correct word
+    row.isCorrect = true
+    playAudio(wordList.value[rowIndex])
+    console.log('Row is correct:', currentWord, correctWord)
+    // Add your logic for a correct row here
+  } else {
+    row.isCorrect = false
+    console.log('Row is incorrect:', currentWord, correctWord)
+    // Add your logic for an incorrect row here
+  }
+}
+
+// Watch for changes in the grid and check rows when they are filled
+watch(
+  grid,
+  (newGrid) => {
+    // Iterate through each row in the grid
+    for (let rowIndex = 0; rowIndex < newGrid.length; rowIndex++) {
+      const row = newGrid[rowIndex]
+      if(row.isCorrect!=true){
+        const isRowFilled = row.every((cell: any) => cell.isPlaced === 1)
+
+        if (isRowFilled) {
+        // If all cells in the row are filled, check the row
+        checkRow(rowIndex)
+        }
+      }
+
+    }
+  },
+  { deep: true }
+)
 </script>
 
 <style scoped>
@@ -374,8 +421,8 @@ const closeModal = () => {
 }
 
 .row {
-  width: 500px;
-  height: 70px;
+  width: 90%;
+  height: 130px;
   display: flex;
   justify-content: space-evenly;
   align-items: center;
@@ -392,6 +439,15 @@ const closeModal = () => {
   justify-content: center;
   align-items: center;
   border-radius: 50%; /* Add this line */
+  background-color: #181818;
+  color: white;
+}
+
+.image-handler {
+  width: 120px; /* Adjust the cell width as needed */
+  height: 120px; /* Adjust the cell height as needed */
+  border: 1px solid #ccc; /* Add borders to cells if desired */
+  align-items: center;
   background-color: #181818;
   color: white;
 }
@@ -467,6 +523,19 @@ const closeModal = () => {
     justify-content: space-evenly;
     align-items: center;
     font-size: 30px; /* Adjust font size as needed */
+  }
+
+  .image-handler {
+    width: 15vw; /* Adjust the cell width as needed */
+    height: 10vh; /* Adjust the cell height as needed */
+    border: 1px solid #ccc; /* Add borders to cells if desired */
+    align-items: center;
+    background-color: #181818;
+    color: white;
+  }
+  .logo {
+    display: block;
+    margin: 0 auto 2rem;
   }
 }
 </style>
