@@ -11,7 +11,7 @@
         left: selectedLetterdivX + 'px',
         top: selectedLetterdivY + 'px',
         display: selectedLetter.text ? '' : 'none',
-        backgroundColor: selectedLetter.color,
+        backgroundColor: selectedLetter.color
       }"
     >
       {{ selectedLetter.text }}
@@ -37,7 +37,7 @@
         <div
           v-for="(cell, colIndex) in row"
           :key="colIndex"
-          :id="'cell'+cell.letter"
+          :id="'cell' + cell.letter"
           class="cell"
           ref="dropZone"
           @dragover.prevent
@@ -50,10 +50,18 @@
             </div>
             <div v-else>{{ cell.letter }}</div>
           </div>
-
         </div>
       </div>
       <!-- <div class="front"></div> -->
+    </div>
+
+    <!-- Correct Modal -->
+    <div v-if="isCorrect" class="overlay">
+      <div class="modal">
+        <div class="checkmark">&#10004;</div>
+        <p>You are correct.</p>
+        <button @click="closeModal">Close</button>
+      </div>
     </div>
   </div>
 </template>
@@ -75,7 +83,7 @@ const selectedLetterdivY = ref(0)
 const audioElement = ref<any>(null)
 
 const player = new Audio()
-
+const isCorrect = ref(false)
 //methods
 onMounted(() => {
   const container: any = scrollContainer.value
@@ -112,17 +120,15 @@ onMounted(() => {
 })
 
 const handleTouchStart = (event: any) => {
-if(event.touches[0]){
-  const touch = event.touches[0]
-  console.log("TOUCH START", event)
-  const currentX = touch.clientX
-  const currentY = touch.clientY
+  if (event.touches[0]) {
+    const touch = event.touches[0]
+    console.log('TOUCH START', event)
+    const currentX = touch.clientX
+    const currentY = touch.clientY
     // Update the selectedLetterdivX and selectedLetterdivY
-  selectedLetterdivX.value = currentX + window.scrollX - 30
-  selectedLetterdivY.value = currentY + window.scrollY - 30
-  
-}
-
+    selectedLetterdivX.value = currentX + window.scrollX - 30
+    selectedLetterdivY.value = currentY + window.scrollY - 30
+  }
 }
 const handleTouchMove = (event: any) => {
   console.log('TOUCHING', event.type)
@@ -155,7 +161,7 @@ const startDrag = (event: any, letter: any) => {
       const currentX = touch.clientX
       const currentY = touch.clientY
       const elementAtTouchPoint: any = document.elementFromPoint(currentX, currentY)
-      console.log("elementAtTouchPoint", elementAtTouchPoint)
+      console.log('elementAtTouchPoint', elementAtTouchPoint)
       if (elementAtTouchPoint !== null && elementAtTouchPoint.id == 'cell' + letter.text) {
         // Another element is touched during touchmove
         touchedElementId = elementAtTouchPoint.id
@@ -186,7 +192,6 @@ const startDrag = (event: any, letter: any) => {
   }
   selectedLetter.value.text = letter.text
   selectedLetter.value.color = letter.color
-
 }
 
 const endDrag = (event: Event, letter: string) => {
@@ -212,24 +217,22 @@ const dropLetter = async (letter: any, rowIndex: number, colIndex: number) => {
     // letters.value.splice(index, 0, selectedLetter.value);
     droppedLetter.value = selectedLetter.value
     selectedLetter.value.text = null
+    isCorrect.value = true
     await playAudio(letter)
-
   }
 }
 
-const playAudio = async(audioId: string) => {
-
+const playAudio = async (audioId: string) => {
   try {
     player.src = `./assets/${audioId}.mp3`
-    console.log("player", player.src)
-    player.play();
-    player.addEventListener('ended', ()=>{
-      console.log("sound ended ")
+    console.log('player', player.src)
+    player.play()
+    player.addEventListener('ended', () => {
+      console.log('sound ended ')
     })
-
   } catch (error) {
-    console.error('Error playing audio:', error);
-  } 
+    console.error('Error playing audio:', error)
+  }
 }
 const generateGrid = () => {
   // Shuffle the letters array randomly
@@ -257,7 +260,7 @@ const shuffleArray = (array: any) => {
 }
 
 const restartGame = () => {
-  console.log("restart")
+  console.log('restart')
   // Initialize the 6x6 grid
   for (let i = 0; i < 6; i++) {
     for (let j = 0; j < 6; j++) {
@@ -266,26 +269,27 @@ const restartGame = () => {
   }
 }
 
+const closeModal = () => {
+  isCorrect.value = false // Close the modal
+}
 </script>
 
 <style scoped>
 /* Style the scrollable container */
 .restart-btn {
-background-color: #007BFF; /* Set the background color */
-color: #fff; /* Set the text color */
-padding: 10px 20px; /* Adjust padding to fit your design */
-border: none; /* Remove border */
-border-radius: 5px; /* Add rounded corners */
-cursor: pointer; /* Change cursor on hover */
-font-size: 1em; /* Set the font size */
-margin-top: 20px; /* Adjust margin as needed */
-margin-bottom: 20px; /* Adjust margin as needed */
-z-index: ;
-
+  background-color: #007bff; /* Set the background color */
+  color: #fff; /* Set the text color */
+  padding: 10px 20px; /* Adjust padding to fit your design */
+  border: none; /* Remove border */
+  border-radius: 5px; /* Add rounded corners */
+  cursor: pointer; /* Change cursor on hover */
+  font-size: 1.5em; /* Set the font size */
+  margin-top: 20px; /* Adjust margin as needed */
+  margin-bottom: 20px; /* Adjust margin as needed */
 }
 
 .restart-btn:hover {
-background-color: #0056b3; /* Change background color on hover */
+  background-color: #0056b3; /* Change background color on hover */
 }
 .scrollable-container {
   display: flex;
@@ -381,6 +385,46 @@ background-color: #0056b3; /* Change background color on hover */
       #007fff
     )
     center top/60px 60px;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Ensure it's above other content */
+}
+
+.modal {
+  padding: 20px;
+  text-align: center;
+  border-radius: 5px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+}
+
+.checkmark {
+  font-size: 3em;
+  color: #008000; /* Green color for the checkmark */
+  margin-bottom: 20px;
+}
+
+.modal button {
+  background-color: #007bff; /* Button background color */
+  color: #fff; /* Button text color */
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em;
+}
+
+.modal button:hover {
+  background-color: #0056b3; /* Change background color on hover */
 }
 
 @media (max-width: 500px) {
