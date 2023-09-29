@@ -57,7 +57,7 @@
             </div>
           </div>
           <div class="image-handler">
-            <img v-if="row.isCorrect" alt="Vue logo" class="image" src="@/assets/logo.svg" width="100" height="100" />
+            <img v-if="row.isCorrect" alt="Vue logo" class="image" :src="getImage(wordList[rowIndex])" width="100" height="100" />
           </div>
         </div>
         <!-- <div class="front"></div> -->
@@ -331,6 +331,11 @@ const checkRow = (rowIndex: any) => {
   }
 }
 
+const getImage = (word: string) => {
+  console.log("word", word)
+  return `./assets/image/${word}.png`;
+}
+
 // Watch for changes in the grid and check rows when they are filled
 watch(
   grid,
@@ -448,8 +453,12 @@ watch(
   height: 120px; /* Adjust the cell height as needed */
   border: 1px solid #ccc; /* Add borders to cells if desired */
   align-items: center;
-  background-color: #181818;
+  background-color: white;
   color: white;
+}
+
+.image{
+  margin: 10px;
 }
 
 .front {
