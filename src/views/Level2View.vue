@@ -60,7 +60,7 @@
       <div class="modal">
         <div class="checkmark">&#10004;</div>
         <p>You are correct.</p>
-        <button @click="closeModal">Close</button>
+        <!-- <button @click="closeModal">Close</button> -->
       </div>
     </div>
   </div>
@@ -219,6 +219,10 @@ const dropLetter = async (letter: any, rowIndex: number, colIndex: number) => {
     selectedLetter.value.text = null
     isCorrect.value = true
     await playAudio(letter)
+
+    setTimeout(() => {
+      isCorrect.value = false
+      }, 1 * 1000); // Convert seconds to milliseconds
   }
 }
 
