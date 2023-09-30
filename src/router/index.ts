@@ -3,6 +3,7 @@ import HomeView from '../views/HomeView.vue'
 import Level1View from '../views/Level1View.vue'
 import Level2View from '../views/Level2View.vue'
 import Level3View from '../views/Level3View.vue'
+import Level4View from '../views/Level4View.vue'
 
 
 const router = createRouter({
@@ -35,6 +36,11 @@ const router = createRouter({
       path: '/level3',
       name: 'level3',
       component: Level3View
+    },
+    {
+      path: '/level4',
+      name: 'level4',
+      component: Level4View
     }
   ]
 })

@@ -16,6 +16,7 @@
     >
       {{ selectedLetter.text }}
     </div>
+    <button @click="scrollToTop" class="go-top-button" v-show="showButton">&#9650;</button>
     <h2>Phonics Game - Level 3</h2>
     <button class="restart-btn" @click="restartGame">Restart</button>
     <div>
@@ -39,7 +40,7 @@
             v-for="(cell, colIndex) in row"
             :key="colIndex"
             :id="cell.letter + 'cell' + rowIndex + colIndex"
-            class="cell"
+            :class="cell.letter===undefined?'cell-empty':'cell'"
             ref="dropZone"
             @dragover.prevent
             @drop="dropLetter(cell.letter, rowIndex, colIndex)"
@@ -57,7 +58,14 @@
             </div>
           </div>
           <div class="image-handler">
-            <img v-if="row.isCorrect" alt="Vue logo" class="image" :src="getImage(wordList[rowIndex])" width="100" height="100" />
+            <img
+              v-if="row.isCorrect"
+              alt="img"
+              class="image"
+              :src="getImage(wordList[rowIndex])"
+              width="100"
+              height="100"
+            />
           </div>
         </div>
         <!-- <div class="front"></div> -->
@@ -76,7 +84,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, onBeforeUnmount } from 'vue'
 
 const unshuffledLetters = ref<any>([])
 const letters = ref<any>([])
@@ -93,10 +101,49 @@ const audioElement = ref<any>(null)
 
 const player = new Audio()
 const isCorrect = ref(false)
-const wordList = ref(['ant', 'bat', 'drum', 'fish', 'van'])
+const wordList = ref([
+  'ant',
+  'bat',
+  'bed',
+  'bus',
+  'cat',
+  'cap',
+  'dog',
+  'egg',
+  'fan',
+  'gas',
+  'hat',
+  'ink',
+  'jam',
+  'jet',
+  'key',
+  'leg',
+  'mop',
+  'nut',
+  'ox',
+  'pen',
+  'pig',
+  'quiz',
+  'rag',
+  'red',
+  'sun',
+  'top',
+  'up',
+  'van',
+  'wig',
+  'six',
+  'box',
+  'yarn',
+  'zoo',
+])
+const showButton = ref(false)
 
 //methods
 onMounted(() => {
+  // Add scroll event listener when the component is mounted
+
+  window.addEventListener('scroll', handleScroll)
+
   const container: any = scrollContainer.value
   container.addEventListener('touchmove', handleTouchMove)
 
@@ -152,10 +199,10 @@ const handleTouchMove = (event: any) => {
   selectedLetterdivX.value = currentX + window.scrollX - 30
   selectedLetterdivY.value = currentY + window.scrollY - 30
 
-  if (currentY >= window.innerHeight - 30) {
-    window.scrollBy(0, 5)
-  } else if (currentY <= 30) {
-    window.scrollBy(0, -5)
+  if (currentY >= window.innerHeight - 60) {
+    window.scrollBy(0, 10)
+  } else if (currentY <= 60) {
+    window.scrollBy(0, -10)
   }
 }
 
@@ -239,7 +286,7 @@ const dropLetter = async (letter: any, rowIndex: number, colIndex: number) => {
 
     setTimeout(() => {
       isCorrect.value = false
-      }, 1 * 1000); // Convert seconds to milliseconds
+    }, 1 * 1000) // Convert seconds to milliseconds
   }
 }
 
@@ -317,7 +364,7 @@ const closeModal = () => {
   isCorrect.value = false // Close the modal
 }
 
-const checkRow = (rowIndex: any) => {
+const checkRow = async(rowIndex: any) => {
   const row = grid.value[rowIndex]
   const correctWord = wordList.value[rowIndex].toUpperCase()
   const currentWord = row.map((cell: any) => cell.letter).join('')
@@ -325,7 +372,19 @@ const checkRow = (rowIndex: any) => {
   if (currentWord === correctWord) {
     // The row forms the correct word
     row.isCorrect = true
-    playAudio(wordList.value[rowIndex])
+
+
+    setTimeout(()=>{
+      const correctRow = grid.value.splice(rowIndex,1);
+      console.log("row", correctRow)
+      const word = wordList.value.splice(rowIndex, 1);
+      console.log("word", word)
+      grid.value.push(correctRow[0]);
+      wordList.value.push(word[0]);
+    }, 2000)
+
+
+    await playAudio(wordList.value[rowIndex])
     console.log('Row is correct:', currentWord, correctWord)
     // Add your logic for a correct row here
   } else {
@@ -336,9 +395,28 @@ const checkRow = (rowIndex: any) => {
 }
 
 const getImage = (word: string) => {
-  console.log("word", word)
-  return `./assets/image/${word}.png`;
+  console.log('word', word)
+  return `./assets/image/${word}.png`
 }
+
+// Function to scroll to the top of the page
+const scrollToTop = () => {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  })
+}
+
+// Show the button when scrolling down
+const handleScroll = () => {
+  console.log('SCROLLING', window.scrollY, showButton.value)
+  showButton.value = window.scrollY > 100 // Adjust the scroll threshold as needed
+}
+
+// Remove scroll event listener when the component is unmounted
+onBeforeUnmount(() => {
+  window.removeEventListener('scroll', handleScroll)
+})
 
 // Watch for changes in the grid and check rows when they are filled
 watch(
@@ -347,15 +425,14 @@ watch(
     // Iterate through each row in the grid
     for (let rowIndex = 0; rowIndex < newGrid.length; rowIndex++) {
       const row = newGrid[rowIndex]
-      if(row.isCorrect!=true){
+      if (row.isCorrect != true) {
         const isRowFilled = row.every((cell: any) => cell.isPlaced === 1)
 
         if (isRowFilled) {
-        // If all cells in the row are filled, check the row
-        checkRow(rowIndex)
+          // If all cells in the row are filled, check the row
+          checkRow(rowIndex)
         }
       }
-
     }
   },
   { deep: true }
@@ -452,6 +529,19 @@ watch(
   color: white;
 }
 
+.cell-empty {
+  width: 55px; /* Adjust the cell width as needed */
+  height: 55px; /* Adjust the cell height as needed */
+  display: flex;
+  margin-left: 1.5%;
+  margin-right: 1.5%;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%; /* Add this line */
+  background-color: #91bbde;
+  color: white;
+}
+
 .image-handler {
   width: 120px; /* Adjust the cell width as needed */
   height: 120px; /* Adjust the cell height as needed */
@@ -461,8 +551,9 @@ watch(
   color: white;
 }
 
-.image{
+.image {
   margin: 10px;
+  font-size: 20px;
 }
 
 .front {
@@ -528,6 +619,21 @@ watch(
   background-color: #0056b3; /* Change background color on hover */
 }
 
+.go-top-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.fa-arrow-up {
+  margin-right: 5px;
+}
 @media (max-width: 500px) {
   .row {
     width: 95vw;
