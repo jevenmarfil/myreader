@@ -19,6 +19,8 @@ import { RouterLink, RouterView } from 'vue-router'
         <RouterLink to="/level1">Level 1</RouterLink>
         <RouterLink to="/level2">Level 2</RouterLink>
         <RouterLink to="/level3">Level 3</RouterLink>
+        <RouterLink to="/level3">Level 4</RouterLink>
+
 
       </nav>
       <RouterView />
