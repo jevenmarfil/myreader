@@ -59,7 +59,6 @@
     <div v-if="isCorrect" class="overlay">
       <div class="modal">
         <div class="checkmark">&#10004;</div>
-        <p>You are correct.</p>
         <!-- <button @click="closeModal">Close</button> -->
       </div>
     </div>

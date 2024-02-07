@@ -17,7 +17,7 @@
       {{ selectedLetter.text }}
     </div>
     <button @click="scrollToTop" class="go-top-button" v-show="showButton">&#9650;</button>
-    <h2>Phonics Game - Level 3</h2>
+    <h2>Phonics Game - Level 4</h2>
     <button class="restart-btn" @click="restartGame">Restart</button>
     <div>
       <div class="letter-container">
@@ -76,7 +76,6 @@
     <div v-if="isCorrect" class="overlay">
       <div class="modal">
         <div class="checkmark">&#10004;</div>
-        <p>You are correct.</p>
         <!-- <button @click="closeModal">Close</button> -->
       </div>
     </div>
